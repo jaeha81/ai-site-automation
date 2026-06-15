@@ -55,6 +55,7 @@ interface CycleResult {
   evolutionInsights?: string
   elapsed?: string
   error?: string
+  agentResults?: Record<string, { status: string; summary: string; revenueAdded: number }>
 }
 
 const AGENT_META: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; color: string; bg: string; border: string; desc: string }> = {
@@ -178,6 +179,11 @@ export default function AgentsPage() {
   }, [])
 
   useEffect(() => {
+    // localStorage에서 이전 사이클 결과 복원
+    try {
+      const saved = localStorage.getItem('lastCycleResult')
+      if (saved) setCycleResult(JSON.parse(saved))
+    } catch {}
     load()
     const t = setInterval(load, 8000)
     return () => clearInterval(t)
@@ -190,6 +196,26 @@ export default function AgentsPage() {
       const res = await fetch('/api/agents/orchestrate', { method: 'POST' })
       const result: CycleResult = await res.json()
       setCycleResult(result)
+      // 성공 시 localStorage 저장 + 에이전트 카드 즉시 업데이트
+      if (result.ok && result.agentResults) {
+        localStorage.setItem('lastCycleResult', JSON.stringify(result))
+        setData(prev => {
+          if (!prev) return prev
+          const updated = prev.agents.map(agent => {
+            const r = result.agentResults?.[agent.agent_name]
+            if (!r) return agent
+            return {
+              ...agent,
+              status: r.status,
+              last_result: r.summary,
+              revenue_contributed: agent.revenue_contributed + r.revenueAdded,
+              total_runs: agent.total_runs + 1,
+              success_runs: r.status === 'completed' ? agent.success_runs + 1 : agent.success_runs,
+            }
+          })
+          return { ...prev, agents: updated }
+        })
+      }
       await load()
     } catch {
       setCycleResult({ ok: false, error: '네트워크 오류' })

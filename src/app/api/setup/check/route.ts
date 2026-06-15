@@ -14,7 +14,7 @@ export async function GET() {
     CRON_SECRET: !!process.env.CRON_SECRET,
   }
 
-  const allRequired = keys.ANTHROPIC_API_KEY && keys.COUPANG_ACCESS_KEY && keys.CRON_SECRET
+  const allRequired = keys.ANTHROPIC_API_KEY && keys.CRON_SECRET
   const youtubeReady = keys.YOUTUBE_CLIENT_ID && keys.YOUTUBE_REFRESH_TOKEN
 
   return NextResponse.json({
