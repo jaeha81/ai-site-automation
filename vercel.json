@@ -2,15 +2,15 @@
   "crons": [
     {
       "path": "/api/cron/daily",
-      "schedule": "0 2 * * *"
+      "schedule": "0 17 * * *"
     },
     {
       "path": "/api/cron/publish",
-      "schedule": "0 9 * * *"
+      "schedule": "0 0 * * *"
     },
     {
       "path": "/api/cron/revenue-sync",
-      "schedule": "0 18 * * *"
+      "schedule": "0 9 * * *"
     }
   ],
   "functions": {
