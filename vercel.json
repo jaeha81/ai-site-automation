@@ -6,11 +6,11 @@
     },
     {
       "path": "/api/cron/publish",
-      "schedule": "0 9,18 * * *"
+      "schedule": "0 9 * * *"
     },
     {
       "path": "/api/cron/revenue-sync",
-      "schedule": "0 * * * *"
+      "schedule": "0 18 * * *"
     }
   ],
   "functions": {
