@@ -12,7 +12,7 @@ export default function HomePage() {
     <div className="space-y-6 max-w-7xl">
       <div>
         <h2 className="text-xl font-bold text-gray-900">수익화 현황</h2>
-        <p className="text-sm text-gray-500 mt-0.5">쇼핑숏츠 에이전트 시스템 — 김정민 전략 기반</p>
+        <p className="text-sm text-gray-500 mt-0.5">쇼핑숏츠 에이전트 자동화 시스템</p>
       </div>
 
       <KPICards

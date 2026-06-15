@@ -69,7 +69,6 @@ export default function Sidebar() {
       </nav>
 
       <div className="px-4 py-3 border-t border-gray-700 text-xs text-gray-500">
-        <p>김정민 전략 기반</p>
         <p>Cron 3종 · 6플랫폼 · 30계정</p>
       </div>
     </aside>

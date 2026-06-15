@@ -1,10 +1,5 @@
 import { getDb } from '@/lib/db'
 
-const SYSTEM_PROMPT = `당신은 쇼핑숏츠 콘텐츠 생성 전문 에이전트입니다.
-김정민의 전략: 30초 이내 영상 or 이미지 3장으로 최대 수익 창출.`
-
-void SYSTEM_PROMPT
-
 const platforms = ['YouTube', 'Instagram', 'TikTok', 'Facebook', 'Threads', 'Naver']
 
 async function toolHandler(name: string, input: Record<string, unknown>): Promise<unknown> {
