@@ -143,7 +143,7 @@ export async function runFullCycle(): Promise<OrchestratorResult> {
       if (!product) continue
 
       const recent = db.prepare(
-        `SELECT COUNT(*) as c FROM content WHERE product_id = ? AND created_at > datetime('now','-3 days')`
+        `SELECT COUNT(*) as c FROM content WHERE product_id = ? AND status IN ('draft','scheduled')`
       ).get(productId) as { c: number }
       if (recent.c > 0) continue
 
