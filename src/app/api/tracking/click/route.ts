@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { queryOne, execute } from '@/lib/db'
 import crypto from 'crypto'
 
 export const runtime = 'nodejs'
@@ -13,21 +13,21 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect('https://www.coupang.com')
   }
 
-  const db = getDb()
-
-  const product = db.prepare('SELECT coupang_url FROM products WHERE id = ?').get(productId) as {
-    coupang_url: string | null
-  } | undefined
+  const product = await queryOne<{ coupang_url: string | null }>(
+    'SELECT coupang_url FROM products WHERE id = ?',
+    [productId]
+  )
 
   const affiliateUrl = product?.coupang_url || 'https://www.coupang.com'
   const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
   const ipHash = crypto.createHash('sha256').update(ip).digest('hex').slice(0, 16)
   const ua = req.headers.get('user-agent') || ''
 
-  db.prepare(
+  await execute(
     `INSERT INTO click_logs (content_id, product_id, affiliate_url, ip_hash, user_agent)
-     VALUES (?, ?, ?, ?, ?)`
-  ).run(contentId, productId, affiliateUrl, ipHash, ua.slice(0, 200))
+     VALUES (?, ?, ?, ?, ?)`,
+    [contentId, productId, affiliateUrl, ipHash, ua.slice(0, 200)]
+  )
 
   return NextResponse.redirect(affiliateUrl)
 }
@@ -39,17 +39,19 @@ export async function POST(req: NextRequest) {
       productId: number
     }
 
-    const db = getDb()
     const ip = req.headers.get('x-forwarded-for') || 'unknown'
     const ipHash = crypto.createHash('sha256').update(ip).digest('hex').slice(0, 16)
 
-    db.prepare(
-      `INSERT INTO click_logs (content_id, product_id, ip_hash) VALUES (?, ?, ?)`
-    ).run(contentId, productId, ipHash)
+    await execute(
+      `INSERT INTO click_logs (content_id, product_id, ip_hash) VALUES (?, ?, ?)`,
+      [contentId, productId, ipHash]
+    )
 
-    const clicks = (db.prepare(
-      `SELECT COUNT(*) as c FROM click_logs WHERE product_id = ?`
-    ).get(productId) as { c: number }).c
+    const row = await queryOne<{ c: number }>(
+      `SELECT COUNT(*) as c FROM click_logs WHERE product_id = ?`,
+      [productId]
+    )
+    const clicks = row?.c ?? 0
 
     return NextResponse.json({ ok: true, totalClicks: clicks })
   } catch {

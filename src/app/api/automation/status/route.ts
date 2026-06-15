@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const status = getAutomationStatus()
+    const status = await getAutomationStatus()
     return NextResponse.json({ ok: true, ...status })
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)

@@ -5,8 +5,8 @@ import TopContent from '@/components/dashboard/TopContent'
 
 export const dynamic = 'force-dynamic'
 
-export default function HomePage() {
-  const summary = getRevenueSummary()
+export default async function HomePage() {
+  const summary = await getRevenueSummary()
 
   return (
     <div className="space-y-6 max-w-7xl">

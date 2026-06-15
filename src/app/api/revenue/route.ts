@@ -5,6 +5,6 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const summary = getRevenueSummary()
+  const summary = await getRevenueSummary()
   return NextResponse.json(summary)
 }

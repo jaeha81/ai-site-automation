@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { USE_MOCK, mockDelay, runToolLoop } from '@/lib/claude-client'
-import { getDb } from '@/lib/db'
+import { query, execute } from '@/lib/db'
 
 const SYSTEM_PROMPT = `당신은 쇼핑숏츠 전문 트렌드 분석 에이전트입니다.
 
@@ -76,22 +76,20 @@ const tools: Anthropic.Tool[] = [
 ]
 
 async function toolHandler(name: string, input: Record<string, unknown>): Promise<unknown> {
-  const db = getDb()
-
   if (name === 'search_trending_products') {
     const { keyword, category } = input as { keyword: string; category?: string }
-    let query = 'SELECT * FROM products WHERE 1=1'
-    const params: unknown[] = []
+    let sql = 'SELECT * FROM products WHERE 1=1'
+    const params: (string | number | null)[] = []
     if (keyword) {
-      query += ' AND name LIKE ?'
+      sql += ' AND name LIKE ?'
       params.push(`%${keyword}%`)
     }
     if (category && category !== '전체') {
-      query += ' AND category = ?'
+      sql += ' AND category = ?'
       params.push(category)
     }
-    query += ' ORDER BY viral_score DESC LIMIT 5'
-    const results = db.prepare(query).all(...params)
+    sql += ' ORDER BY viral_score DESC LIMIT 5'
+    const results = await query<Record<string, unknown>>(sql, params)
     return { found: results.length, products: results }
   }
 
@@ -144,16 +142,17 @@ async function toolHandler(name: string, input: Record<string, unknown>): Promis
       viral_score?: number
       estimated_revenue?: number
     }
-    const result = db.prepare(
-      'INSERT INTO products (name, category, coupang_url, commission_rate, viral_score, estimated_revenue) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run(
-      name, category,
-      coupang_url || null,
-      commission_rate || 3.0,
-      viral_score || 70,
-      estimated_revenue || 1000000
+    const { lastInsertRowid } = await execute(
+      'INSERT INTO products (name, category, coupang_url, commission_rate, viral_score, estimated_revenue) VALUES (?, ?, ?, ?, ?, ?)',
+      [
+        name, category,
+        coupang_url || null,
+        commission_rate || 3.0,
+        viral_score || 70,
+        estimated_revenue || 1000000,
+      ]
     )
-    return { saved: true, id: result.lastInsertRowid, name }
+    return { saved: true, id: lastInsertRowid, name }
   }
 
   return { error: 'Unknown tool' }

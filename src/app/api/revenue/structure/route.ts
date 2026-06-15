@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { query, queryOne } from '@/lib/db'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const db = getDb()
-
-    const byProduct = db.prepare(`
+    const byProduct = await query<{
+      name: string; category: string; commission_rate: number
+      total_revenue: number; total_views: number; content_count: number; rpm: number
+    }>(`
       SELECT p.name, p.category, p.commission_rate,
              SUM(c.revenue) as total_revenue,
              SUM(c.views) as total_views,
@@ -20,12 +21,12 @@ export async function GET() {
       GROUP BY p.id
       ORDER BY total_revenue DESC
       LIMIT 10
-    `).all() as Array<{
-      name: string; category: string; commission_rate: number
-      total_revenue: number; total_views: number; content_count: number; rpm: number
-    }>
+    `)
 
-    const byPlatform = db.prepare(`
+    const byPlatform = await query<{
+      platform: string; total_revenue: number; total_views: number
+      content_count: number; avg_revenue_per_post: number
+    }>(`
       SELECT c.platform,
              SUM(c.revenue) as total_revenue,
              SUM(c.views) as total_views,
@@ -35,12 +36,12 @@ export async function GET() {
       WHERE c.status = 'posted'
       GROUP BY c.platform
       ORDER BY total_revenue DESC
-    `).all() as Array<{
-      platform: string; total_revenue: number; total_views: number
-      content_count: number; avg_revenue_per_post: number
-    }>
+    `)
 
-    const byCategory = db.prepare(`
+    const byCategory = await query<{
+      category: string; total_revenue: number; total_views: number
+      product_count: number; avg_commission: number
+    }>(`
       SELECT p.category,
              SUM(c.revenue) as total_revenue,
              SUM(c.views) as total_views,
@@ -51,12 +52,13 @@ export async function GET() {
       WHERE c.status = 'posted'
       GROUP BY p.category
       ORDER BY total_revenue DESC
-    `).all() as Array<{
-      category: string; total_revenue: number; total_views: number
-      product_count: number; avg_commission: number
-    }>
+    `)
 
-    const funnel = db.prepare(`
+    const funnel = await queryOne<{
+      products_discovered: number; content_created: number
+      content_scheduled: number; content_posted: number
+      total_views: number; total_clicks: number; total_revenue: number
+    }>(`
       SELECT
         COUNT(DISTINCT p.id) as products_discovered,
         COUNT(c.id) as content_created,
@@ -67,13 +69,9 @@ export async function GET() {
         SUM(c.revenue) as total_revenue
       FROM products p
       LEFT JOIN content c ON c.product_id = p.id
-    `).get() as {
-      products_discovered: number; content_created: number
-      content_scheduled: number; content_posted: number
-      total_views: number; total_clicks: number; total_revenue: number
-    }
+    `)
 
-    const weeklyTrend = db.prepare(`
+    const weeklyTrend = await query<{ date: string; revenue: number; commission_type: string }>(`
       SELECT DATE(logged_at) as date,
              SUM(amount) as revenue,
              commission_type
@@ -81,24 +79,22 @@ export async function GET() {
       WHERE logged_at >= datetime('now', '-30 days')
       GROUP BY DATE(logged_at), commission_type
       ORDER BY date
-    `).all() as Array<{ date: string; revenue: number; commission_type: string }>
+    `)
 
-    const agentContrib = db.prepare(`
+    const agentContrib = await query<{
+      agent_name: string; revenue_contributed: number
+      total_runs: number; success_runs: number
+    }>(`
       SELECT agent_name, revenue_contributed, total_runs, success_runs
       FROM agent_states
       ORDER BY revenue_contributed DESC
-    `).all() as Array<{
-      agent_name: string; revenue_contributed: number
-      total_runs: number; success_runs: number
-    }>
+    `)
 
-    const accounts = db.prepare(
-      `SELECT * FROM revenue_accounts ORDER BY id`
-    ).all() as Array<{
+    const accounts = await query<{
       id: number; account_type: string; account_name: string | null
       bank_name: string | null; account_number_masked: string | null
       is_verified: number; total_received: number; last_settled_at: string | null
-    }>
+    }>(`SELECT * FROM revenue_accounts ORDER BY id`)
 
     return NextResponse.json({
       ok: true, byProduct, byPlatform, byCategory,

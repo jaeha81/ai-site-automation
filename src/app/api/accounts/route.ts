@@ -1,23 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { query } from '@/lib/db'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
-  const db = getDb()
   const { searchParams } = new URL(req.url)
   const platform = searchParams.get('platform')
 
-  let query = 'SELECT * FROM accounts'
-  const params: unknown[] = []
+  let sql = 'SELECT * FROM accounts'
+  const params: (null | string | number)[] = []
 
   if (platform) {
-    query += ' WHERE platform = ?'
+    sql += ' WHERE platform = ?'
     params.push(platform)
   }
-  query += ' ORDER BY total_revenue DESC'
+  sql += ' ORDER BY total_revenue DESC'
 
-  const accounts = db.prepare(query).all(...params)
+  const accounts = await query<Record<string, unknown>>(sql, params)
   return NextResponse.json(accounts)
 }

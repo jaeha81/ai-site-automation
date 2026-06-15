@@ -1,10 +1,8 @@
-import { getDb } from '@/lib/db'
+import { execute } from '@/lib/db'
 
 const platforms = ['YouTube', 'Instagram', 'TikTok', 'Facebook', 'Threads', 'Naver']
 
 async function toolHandler(name: string, input: Record<string, unknown>): Promise<unknown> {
-  const db = getDb()
-
   if (name === 'generate_hook_script') {
     const { product_name, celebrity } = input as { product_name: string; celebrity?: string }
     const hooks = [
@@ -50,13 +48,13 @@ async function toolHandler(name: string, input: Record<string, unknown>): Promis
       product_id: number
       contents: Array<{ platform: string; hook: string; script: string; image_prompt: string }>
     }
-    const insert = db.prepare(
-      'INSERT INTO content (product_id, platform, hook, script, image_prompt, status) VALUES (?, ?, ?, ?, ?, ?)'
-    )
     const ids: number[] = []
     for (const c of contents) {
-      const r = insert.run(product_id, c.platform, c.hook, c.script, c.image_prompt, 'draft')
-      ids.push(Number(r.lastInsertRowid))
+      const { lastInsertRowid } = await execute(
+        'INSERT INTO content (product_id, platform, hook, script, image_prompt, status) VALUES (?, ?, ?, ?, ?, ?)',
+        [product_id, c.platform, c.hook, c.script, c.image_prompt, 'draft']
+      )
+      ids.push(lastInsertRowid)
     }
     return { saved: ids.length, content_ids: ids }
   }

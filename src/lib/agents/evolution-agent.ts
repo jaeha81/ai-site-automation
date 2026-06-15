@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db'
+import { query, queryOne, execute } from '@/lib/db'
 import { anthropic, USE_MOCK } from '@/lib/claude-client'
 
 export interface EvolutionResult {
@@ -18,16 +18,13 @@ export interface Strategy {
   priorityCategories: string[]
 }
 
-export function getLatestStrategy(): Strategy {
-  const db = getDb()
-  const latest = db.prepare(
-    `SELECT * FROM evolution_log ORDER BY id DESC LIMIT 1`
-  ).get() as {
+export async function getLatestStrategy(): Promise<Strategy> {
+  const latest = await queryOne<{
     top_product: string | null
     top_platform: string | null
     top_hook: string | null
     strategy_changes: string | null
-  } | undefined
+  }>(`SELECT * FROM evolution_log ORDER BY id DESC LIMIT 1`)
 
   const defaultStrategy: Strategy = {
     topKeyword: '다이소 핫템',
@@ -57,22 +54,22 @@ export function getLatestStrategy(): Strategy {
 }
 
 export async function runEvolutionAgent(): Promise<EvolutionResult> {
-  const db = getDb()
-
   // 성과 데이터 수집
-  const topContent = db.prepare(`
+  const topContent = await query<{
+    id: number; hook: string | null; platform: string
+    views: number; revenue: number; product_name: string; category: string
+  }>(`
     SELECT c.id, c.hook, c.platform, c.views, c.revenue, p.name as product_name, p.category
     FROM content c
     JOIN products p ON c.product_id = p.id
     WHERE c.status = 'posted' AND c.views > 0
     ORDER BY c.revenue DESC
     LIMIT 10
-  `).all() as Array<{
-    id: number; hook: string | null; platform: string
-    views: number; revenue: number; product_name: string; category: string
-  }>
+  `)
 
-  const platformPerf = db.prepare(`
+  const platformPerf = await query<{
+    platform: string; total_views: number; total_revenue: number; content_count: number
+  }>(`
     SELECT c.platform,
            SUM(c.views) as total_views,
            SUM(c.revenue) as total_revenue,
@@ -81,11 +78,9 @@ export async function runEvolutionAgent(): Promise<EvolutionResult> {
     WHERE c.status = 'posted'
     GROUP BY c.platform
     ORDER BY total_revenue DESC
-  `).all() as Array<{
-    platform: string; total_views: number; total_revenue: number; content_count: number
-  }>
+  `)
 
-  const categoryPerf = db.prepare(`
+  const categoryPerf = await query<{ category: string; total_revenue: number; avg_views: number }>(`
     SELECT p.category,
            SUM(c.revenue) as total_revenue,
            AVG(c.views) as avg_views
@@ -95,13 +90,13 @@ export async function runEvolutionAgent(): Promise<EvolutionResult> {
     GROUP BY p.category
     ORDER BY total_revenue DESC
     LIMIT 5
-  `).all() as Array<{ category: string; total_revenue: number; avg_views: number }>
+  `)
 
-  const prevCycle = db.prepare(
+  const prevCycle = await queryOne<{ total: number | null }>(
     `SELECT SUM(amount) as total FROM revenue_logs WHERE logged_at >= datetime('now', '-7 days')`
-  ).get() as { total: number | null }
+  )
 
-  const prevWeekRev = prevCycle.total || 0
+  const prevWeekRev = prevCycle?.total || 0
   const topPlatform = platformPerf[0]?.platform || 'YouTube'
   const topProduct = topContent[0]?.product_name || '다이소 핫템'
   const topHook = topContent[0]?.hook || '이거 다이소에서 파는 거 맞아??'
@@ -161,18 +156,17 @@ function buildMockInsights(
   ].join('\n')
 }
 
-function saveAndReturn(
+async function saveAndReturn(
   insights: string, topProduct: string,
   topPlatform: string, topHook: string, prevWeekRev: number
-): EvolutionResult {
-  const db = getDb()
-  const lastCycle = db.prepare(`SELECT MAX(cycle) as c FROM evolution_log`).get() as { c: number | null }
-  const cycle = (lastCycle.c || 0) + 1
+): Promise<EvolutionResult> {
+  const lastCycle = await queryOne<{ c: number | null }>(`SELECT MAX(cycle) as c FROM evolution_log`)
+  const cycle = (lastCycle?.c || 0) + 1
 
-  db.prepare(`
+  await execute(`
     INSERT INTO evolution_log (cycle, insights, top_product, top_platform, top_hook, performance_delta)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).run(cycle, insights, topProduct, topPlatform, topHook, prevWeekRev)
+  `, [cycle, insights, topProduct, topPlatform, topHook, prevWeekRev])
 
   return {
     insights,

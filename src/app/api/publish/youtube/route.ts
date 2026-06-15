@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { queryOne, execute } from '@/lib/db'
 import { uploadYouTubeShorts, buildShortsDescription, buildShortsTags } from '@/lib/youtube'
 
 export const runtime = 'nodejs'
@@ -12,15 +12,15 @@ export async function POST(req: NextRequest) {
       videoUrl?: string
     }
 
-    const db = getDb()
-    const content = db.prepare(
-      `SELECT c.*, p.name as product_name, p.category, p.coupang_url
-       FROM content c JOIN products p ON c.product_id = p.id
-       WHERE c.id = ?`
-    ).get(contentId) as {
+    const content = await queryOne<{
       id: number; hook: string; script: string
       product_name: string; category: string; coupang_url: string | null
-    } | undefined
+    }>(
+      `SELECT c.*, p.name as product_name, p.category, p.coupang_url
+       FROM content c JOIN products p ON c.product_id = p.id
+       WHERE c.id = ?`,
+      [contentId]
+    )
 
     if (!content) {
       return NextResponse.json({ error: '콘텐츠를 찾을 수 없습니다.' }, { status: 404 })
@@ -31,9 +31,10 @@ export async function POST(req: NextRequest) {
     const description = buildShortsDescription(content.script || '', affiliateUrl, tags)
 
     if (!process.env.YOUTUBE_REFRESH_TOKEN) {
-      db.prepare(
-        `UPDATE content SET status = 'scheduled', posted_at = NULL WHERE id = ?`
-      ).run(contentId)
+      await execute(
+        `UPDATE content SET status = 'scheduled', posted_at = NULL WHERE id = ?`,
+        [contentId]
+      )
       return NextResponse.json({
         ok: true,
         mock: true,
@@ -62,13 +63,15 @@ export async function POST(req: NextRequest) {
       videoBuffer
     )
 
-    db.prepare(
-      `UPDATE content SET status = 'posted', posted_at = datetime('now') WHERE id = ?`
-    ).run(contentId)
-    db.prepare(
+    await execute(
+      `UPDATE content SET status = 'posted', posted_at = datetime('now') WHERE id = ?`,
+      [contentId]
+    )
+    await execute(
       `UPDATE scheduled_posts SET status = 'published', youtube_video_id = ?, published_at = datetime('now')
-       WHERE content_id = ? AND platform = 'YouTube'`
-    ).run(result.videoId, contentId)
+       WHERE content_id = ? AND platform = 'YouTube'`,
+      [result.videoId, contentId]
+    )
 
     return NextResponse.json({ ok: true, ...result })
   } catch (err) {

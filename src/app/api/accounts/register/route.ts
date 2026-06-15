@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { query, queryOne, execute } from '@/lib/db'
 
 export const runtime = 'nodejs'
 
@@ -22,21 +22,22 @@ export async function POST(req: NextRequest) {
       ? account_number.replace(/(\d{3})\d+(\d{4})/, '$1****$2')
       : null
 
-    const db = getDb()
-    const existing = db.prepare(
-      `SELECT id FROM revenue_accounts WHERE account_type = ? AND account_name = ?`
-    ).get(account_type, account_name)
+    const existing = await queryOne<{ id: number }>(
+      `SELECT id FROM revenue_accounts WHERE account_type = ? AND account_name = ?`,
+      [account_type, account_name]
+    )
 
     if (existing) {
       return NextResponse.json({ error: '이미 등록된 계좌입니다.' }, { status: 409 })
     }
 
-    const r = db.prepare(
+    const { lastInsertRowid } = await execute(
       `INSERT INTO revenue_accounts (account_type, account_name, bank_name, account_number_masked, account_holder)
-       VALUES (?, ?, ?, ?, ?)`
-    ).run(account_type, account_name, bank_name ?? null, masked, account_holder ?? null)
+       VALUES (?, ?, ?, ?, ?)`,
+      [account_type, account_name, bank_name ?? null, masked, account_holder ?? null]
+    )
 
-    return NextResponse.json({ ok: true, id: Number(r.lastInsertRowid), masked })
+    return NextResponse.json({ ok: true, id: lastInsertRowid, masked })
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     return NextResponse.json({ ok: false, error: msg }, { status: 500 })
@@ -44,8 +45,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  const db = getDb()
-  const accounts = db.prepare(`SELECT * FROM revenue_accounts ORDER BY id`).all()
+  const accounts = await query<Record<string, unknown>>(
+    `SELECT * FROM revenue_accounts ORDER BY id`
+  )
   return NextResponse.json({ ok: true, accounts })
 }
 
@@ -53,6 +55,6 @@ export async function DELETE(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const id = parseInt(searchParams.get('id') || '0')
   if (!id) return NextResponse.json({ error: 'id 필요' }, { status: 400 })
-  getDb().prepare(`DELETE FROM revenue_accounts WHERE id = ?`).run(id)
+  await execute(`DELETE FROM revenue_accounts WHERE id = ?`, [id])
   return NextResponse.json({ ok: true })
 }
