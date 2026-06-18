@@ -7,6 +7,14 @@
     {
       "path": "/api/cron/revenue-sync",
       "schedule": "0 21 * * *"
+    },
+    {
+      "path": "/api/cron/threads-daily",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/threads-daily",
+      "schedule": "0 12 * * *"
     }
   ],
   "functions": {

@@ -189,6 +189,44 @@ const SCHEMA_STMTS = [
   `INSERT OR IGNORE INTO agent_states (agent_name, status) VALUES ('publish_agent', 'idle')`,
   `INSERT OR IGNORE INTO agent_states (agent_name, status) VALUES ('revenue_agent', 'idle')`,
   `INSERT OR IGNORE INTO agent_states (agent_name, status) VALUES ('evolution_agent', 'idle')`,
+  // Threads monetization tables
+  `CREATE TABLE IF NOT EXISTS threads_accounts (
+    id TEXT PRIMARY KEY,
+    username TEXT NOT NULL,
+    access_token TEXT,
+    user_id TEXT,
+    token_expires_at INTEGER,
+    daily_post_count INTEGER DEFAULT 0,
+    daily_comment_count INTEGER DEFAULT 0,
+    last_reset_date TEXT,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`,
+  `CREATE TABLE IF NOT EXISTS threads_posts (
+    id TEXT PRIMARY KEY,
+    account_id TEXT REFERENCES threads_accounts(id),
+    threads_post_id TEXT,
+    product_id INTEGER REFERENCES products(id),
+    affiliate_link TEXT,
+    content TEXT,
+    category TEXT,
+    status TEXT DEFAULT 'pending',
+    clicks INTEGER DEFAULT 0,
+    revenue REAL DEFAULT 0,
+    posted_at TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`,
+  `CREATE TABLE IF NOT EXISTS threads_comments (
+    id TEXT PRIMARY KEY,
+    account_id TEXT REFERENCES threads_accounts(id),
+    target_post_id TEXT,
+    content TEXT,
+    status TEXT DEFAULT 'pending',
+    created_at TEXT DEFAULT (datetime('now'))
+  )`,
+  `INSERT OR IGNORE INTO agent_states (agent_name, status) VALUES ('threads_discovery_agent', 'idle')`,
+  `INSERT OR IGNORE INTO agent_states (agent_name, status) VALUES ('threads_post_agent', 'idle')`,
+  `INSERT OR IGNORE INTO agent_states (agent_name, status) VALUES ('threads_engagement_agent', 'idle')`,
 ]
 
 const WORKFLOW_JOBS_SCHEMA = `CREATE TABLE IF NOT EXISTS workflow_jobs (
@@ -324,5 +362,42 @@ export type ScheduledPost = {
   youtube_video_id: string | null
   published_at: string | null
   error: string | null
+  created_at: string
+}
+
+export type ThreadsAccount = {
+  id: string
+  username: string
+  access_token: string | null
+  user_id: string | null
+  token_expires_at: number | null
+  daily_post_count: number
+  daily_comment_count: number
+  last_reset_date: string | null
+  is_active: number
+  created_at: string
+}
+
+export type ThreadsPost = {
+  id: string
+  account_id: string
+  threads_post_id: string | null
+  product_id: number | null
+  affiliate_link: string | null
+  content: string | null
+  category: string | null
+  status: string
+  clicks: number
+  revenue: number
+  posted_at: string | null
+  created_at: string
+}
+
+export type ThreadsComment = {
+  id: string
+  account_id: string
+  target_post_id: string | null
+  content: string | null
+  status: string
   created_at: string
 }
