@@ -25,7 +25,7 @@ export default async function HomePage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-gray-900">수익화 현황</h2>
-          <p className="text-sm text-gray-500 mt-0.5">쇼핑숏츠 에이전트 자동화 시스템</p>
+          <p className="text-sm text-gray-500 mt-0.5">Threads 에이전트 수익화 자동화 시스템</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">

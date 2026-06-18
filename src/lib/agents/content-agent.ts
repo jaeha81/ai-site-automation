@@ -74,7 +74,7 @@ JSON形式のみで回答：
   }
 
   // Korean (default)
-  return `당신은 한국 쇼핑숏츠 전문 콘텐츠 크리에이터이자 클릭율 최적화 전문가입니다.
+  return `당신은 한국 Threads 수익화 전문 콘텐츠 크리에이터이자 클릭율 최적화 전문가입니다.
 
 클릭 극대화 원칙:
 1. 훅 (0-3초): 심리적 트리거 필수 사용
@@ -185,7 +185,7 @@ export async function runContentAgent(
     ? `제품명: "${productName}"
 카테고리: ${category}${priceStr}
 
-${platforms.join(', ')} 6개 플랫폼용 클릭율 극대화 쇼핑숏츠 콘텐츠를 생성하세요.
+${platforms.join(', ')} 6개 플랫폼용 클릭율 극대화 Threads 수익화 콘텐츠를 생성하세요.
 각 훅은 반드시 서로 다른 심리 기법을 사용해야 합니다.`
     : `Product: "${productName}"
 Category: ${category}${priceStr}

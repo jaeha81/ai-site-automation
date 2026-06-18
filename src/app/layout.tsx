@@ -5,13 +5,13 @@ import Header from '@/components/layout/Header'
 import CookieConsent from '@/components/layout/CookieConsent'
 
 export const metadata: Metadata = {
-  title: '쇼츠 수익화 대시보드',
-  description: '쇼핑숏츠 에이전트 기반 수익화 시스템',
+  title: '쓰레드 수익화 대시보드',
+  description: 'Threads 에이전트 기반 쿠팡파트너스 수익화 시스템',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: '숏츠수익',
+    title: '쓰레드수익',
   },
   formatDetection: { telephone: false },
   icons: {

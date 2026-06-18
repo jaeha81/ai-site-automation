@@ -116,8 +116,8 @@ export async function runEvolutionAgent(): Promise<EvolutionResult> {
 
   try {
     const result = await generateJSON<{ insights: string }>(
-      '당신은 쇼핑숏츠 수익화 전략 분석가입니다. 성과 데이터를 분석하고 JSON 형식으로만 응답합니다.',
-      `쇼핑숏츠 성과 데이터를 분석하고 다음 사이클 전략을 제안해주세요.\n\n데이터:\n${perfSummary}\n\n다음 형식으로 응답:\n{"insights": "[인사이트] ...\\n[추천 키워드] ...\\n[추천 플랫폼] ...\\n[전략 변경] ..."}`
+      '당신은 Threads 수익화 전략 분석가입니다. 성과 데이터를 분석하고 JSON 형식으로만 응답합니다.',
+      `Threads 수익화 성과 데이터를 분석하고 다음 사이클 전략을 제안해주세요.\n\n데이터:\n${perfSummary}\n\n다음 형식으로 응답:\n{"insights": "[인사이트] ...\\n[추천 키워드] ...\\n[추천 플랫폼] ...\\n[전략 변경] ..."}`
     )
     return saveAndReturn(result.insights || buildMockInsights(topProduct, topPlatform, topHook, topCategory, prevWeekRev),
       topProduct, topPlatform, topHook, prevWeekRev)

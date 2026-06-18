@@ -20,7 +20,7 @@ const TITLES: Record<string, string> = {
 
 export default function Header() {
   const pathname = usePathname()
-  const title = TITLES[pathname] || '쇼츠 수익화'
+  const title = TITLES[pathname] || '쓰레드 수익화'
   const [isMock, setIsMock] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function Header() {
         <MobileNav />
         <div className="flex items-center gap-2 md:hidden">
           <Zap className="text-yellow-500" size={18} />
-          <span className="font-bold text-sm">쇼츠 수익화</span>
+          <span className="font-bold text-sm">쓰레드 수익화</span>
         </div>
         <h1 className="hidden md:block font-semibold text-gray-800">{title}</h1>
       </div>

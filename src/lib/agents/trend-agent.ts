@@ -14,7 +14,7 @@ interface TrendAnalysis {
   insights: string
 }
 
-const SYSTEM_PROMPT = `당신은 쇼핑숏츠 전문 트렌드 분석 에이전트입니다.
+const SYSTEM_PROMPT = `당신은 Threads 수익화 전문 트렌드 분석 에이전트입니다.
 
 핵심 전략:
 1. 모든 카테고리(다이소, 뷰티, 유아, 전자기기, 스포츠, 패션) 탐색
@@ -56,7 +56,7 @@ export async function runTrendAgent(keyword: string, category?: string) {
 
 현재 DB에 이미 있는 제품 (중복 금지): ${existingNames || '없음'}
 
-위 키워드/카테고리로 쇼핑숏츠에 적합한 트렌딩 제품 3~5개를 발굴해주세요.
+위 키워드/카테고리로 Threads 수익화에 적합한 트렌딩 제품 3~5개를 발굴해주세요.
 쿠팡 파트너스 수익 극대화 관점에서 viral_score(0-100)와 estimated_revenue(월 예상 원화 수익)를 산정하세요.`
 
   try {

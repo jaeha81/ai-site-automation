@@ -38,7 +38,7 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
         <div className="mb-6 text-center">
           <div className="text-3xl mb-2">📊</div>
-          <h1 className="text-xl font-bold text-gray-900">쇼츠 수익화 대시보드</h1>
+          <h1 className="text-xl font-bold text-gray-900">쓰레드 수익화 대시보드</h1>
           <p className="text-sm text-gray-500 mt-1">비밀번호를 입력하세요</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">

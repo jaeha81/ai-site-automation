@@ -1,7 +1,7 @@
 {
-  "name": "쇼핑숏츠 수익화 대시보드",
-  "short_name": "숏츠수익",
-  "description": "쇼핑숏츠 에이전트 기반 자율수익화 시스템",
+  "name": "쓰레드 수익화 대시보드",
+  "short_name": "쓰레드수익",
+  "description": "Threads 에이전트 기반 쿠팡파트너스 수익화 시스템",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f9fafb",

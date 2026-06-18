@@ -170,10 +170,10 @@ const STEPS: Step[] = [
     borderColor: 'border-indigo-200',
     required: false,
     envKey: 'SHORTS_DISCORD_WEBHOOK',
-    description: '쇼츠 수익화 전용 Discord 채널 - jh-chat(Bucky 전용)과 충돌 없이 분리 운영',
+    description: '쓰레드 수익화 전용 Discord 채널 - jh-chat(Bucky 전용)과 충돌 없이 분리 운영',
     envVars: ['SHORTS_DISCORD_WEBHOOK', 'SHORTS_DISCORD_PUBLIC_KEY', 'SHORTS_DISCORD_APPLICATION_ID', 'SHORTS_DISCORD_BOT_TOKEN', 'SHORTS_DISCORD_GUILD_ID'],
     steps: [
-      { text: 'Discord 서버에 쇼츠 수익화 전용 채널 생성 (예: #shorts-수익화)' },
+      { text: 'Discord 서버에 쓰레드 수익화 전용 채널 생성 (예: #threads-수익화)' },
       { text: '채널 설정 → 통합 → 웹훅 → 새 웹훅 생성 후 URL 복사' },
       { text: 'Vercel에 SHORTS_DISCORD_WEBHOOK=https://discord.com/api/webhooks/... 추가' },
       { text: '슬래시 커맨드: SHORTS_DISCORD_APPLICATION_ID, SHORTS_DISCORD_BOT_TOKEN, SHORTS_DISCORD_GUILD_ID 추가 (선택)' },

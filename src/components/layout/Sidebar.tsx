@@ -37,8 +37,8 @@ export default function Sidebar() {
       <div className="flex items-center gap-2 px-4 py-5 border-b border-gray-700">
         <Zap className="text-yellow-400" size={22} />
         <div>
-          <p className="font-bold text-sm leading-tight">쇼츠 수익화</p>
-          <p className="text-xs text-gray-400">Agent Dashboard</p>
+          <p className="font-bold text-sm leading-tight">쓰레드 수익화</p>
+          <p className="text-xs text-gray-400">Threads Dashboard</p>
         </div>
       </div>
 
