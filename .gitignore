@@ -42,3 +42,5 @@ next-env.d.ts
 /data/*.db-wal
 
 .vercel
+
+.vercel
