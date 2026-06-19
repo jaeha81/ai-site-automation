@@ -136,6 +136,48 @@ export async function generateAffiliateLink(
   }
 }
 
+export interface RevenueRecord {
+  date: string
+  grossRevenue: number
+  taxWithheld: number
+  netRevenue: number
+  clicks: number
+  orders: number
+}
+
+export async function getCoupangRevenueHistory(
+  startDate: string,
+  endDate: string
+): Promise<RevenueRecord[]> {
+  if (!ACCESS_KEY || !SECRET_KEY) return []
+
+  const path = '/v2/providers/affiliate_open_api/apis/openapi/v1/revenue-history'
+  const q = `startDate=${startDate}&endDate=${endDate}`
+  const auth = buildAuthHeader('GET', path, q)
+
+  try {
+    const res = await fetch(`${BASE_URL}${path}?${q}`, {
+      headers: { Authorization: auth, 'Content-Type': 'application/json' },
+    })
+    if (!res.ok) return []
+    const data = await res.json()
+    return (data.data || []).map((r: Record<string, unknown>) => {
+      const gross = Math.round((r.revenue as number) ?? 0)
+      const tax = Math.round(gross * 0.033)
+      return {
+        date: r.date as string,
+        grossRevenue: gross,
+        taxWithheld: tax,
+        netRevenue: gross - tax,
+        clicks: (r.clicks as number) ?? 0,
+        orders: (r.orders as number) ?? 0,
+      }
+    })
+  } catch {
+    return []
+  }
+}
+
 export function getCategoryCommissionRate(category: string): number {
   const rates: Record<string, number> = {
     '뷰티': 5.0,

@@ -227,6 +227,36 @@ const SCHEMA_STMTS = [
   `INSERT OR IGNORE INTO agent_states (agent_name, status) VALUES ('threads_discovery_agent', 'idle')`,
   `INSERT OR IGNORE INTO agent_states (agent_name, status) VALUES ('threads_post_agent', 'idle')`,
   `INSERT OR IGNORE INTO agent_states (agent_name, status) VALUES ('threads_engagement_agent', 'idle')`,
+  // 수익 관리 테이블
+  `CREATE TABLE IF NOT EXISTS bank_accounts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    bank_name TEXT NOT NULL,
+    account_number_masked TEXT NOT NULL,
+    account_holder TEXT NOT NULL,
+    is_primary INTEGER DEFAULT 0,
+    platform TEXT DEFAULT 'coupang_partners',
+    created_at TEXT DEFAULT (datetime('now'))
+  )`,
+  `CREATE TABLE IF NOT EXISTS payout_records (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    payout_date TEXT NOT NULL,
+    gross_amount INTEGER NOT NULL,
+    tax_withheld INTEGER NOT NULL,
+    net_amount INTEGER NOT NULL,
+    platform TEXT DEFAULT 'coupang_partners',
+    bank_account_id INTEGER REFERENCES bank_accounts(id),
+    status TEXT DEFAULT 'expected',
+    memo TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`,
+  `CREATE TABLE IF NOT EXISTS income_tracker (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    year INTEGER NOT NULL UNIQUE,
+    gross_income INTEGER DEFAULT 0,
+    tax_withheld INTEGER DEFAULT 0,
+    net_income INTEGER DEFAULT 0,
+    last_updated TEXT DEFAULT (datetime('now'))
+  )`,
 ]
 
 const WORKFLOW_JOBS_SCHEMA = `CREATE TABLE IF NOT EXISTS workflow_jobs (
@@ -400,4 +430,36 @@ export type ThreadsComment = {
   content: string | null
   status: string
   created_at: string
+}
+
+export type BankAccount = {
+  id: number
+  bank_name: string
+  account_number_masked: string
+  account_holder: string
+  is_primary: number
+  platform: string
+  created_at: string
+}
+
+export type PayoutRecord = {
+  id: number
+  payout_date: string
+  gross_amount: number
+  tax_withheld: number
+  net_amount: number
+  platform: string
+  bank_account_id: number | null
+  status: string
+  memo: string | null
+  created_at: string
+}
+
+export type IncomeTracker = {
+  id: number
+  year: number
+  gross_income: number
+  tax_withheld: number
+  net_income: number
+  last_updated: string
 }

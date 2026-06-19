@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "agent": "ts-node --project scripts/tsconfig.json -r tsconfig-paths/register scripts/local-agent.ts",
+    "agent:dev": "ts-node --project scripts/tsconfig.json -r tsconfig-paths/register --watch scripts/local-agent.ts",
+    "discord:setup": "ts-node --project scripts/tsconfig.json scripts/setup-discord.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
@@ -21,8 +24,10 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
+    "discord.js": "^14.26.4",
     "lucide-react": "^1.18.0",
     "next": "14.2.35",
+    "node-cron": "^4.4.1",
     "react": "^18",
     "react-dom": "^18",
     "recharts": "^3.8.1",
@@ -30,12 +35,15 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/node-cron": "^3.0.11",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5"
   }
 }

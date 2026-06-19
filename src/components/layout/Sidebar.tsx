@@ -24,7 +24,7 @@ const NAV = [
   { href: '/products', label: '제품 발굴', icon: Search },
   { href: '/content', label: '콘텐츠 생성', icon: FileVideo },
   { href: '/accounts', label: '계정 관리', icon: Users },
-  { href: '/revenue', label: '수익 추적', icon: TrendingUp },
+  { href: '/revenue', label: '수익 관리', icon: TrendingUp },
   { href: '/calendar', label: '콘텐츠 캘린더', icon: Calendar },
   { href: '/setup', label: 'API 설정', icon: Settings },
 ]
